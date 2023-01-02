@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: ToDo API
+  description: |-
+    Ini adalah dokumentasi API untuk
+    
+    ToDo list service yang dibuat di alterra
+  contact:
+    name: Jerry
+    email: jerry@alterra.id
+  version: 1.0.0
+servers:
+  - url: webisteku.com
+    description: digunakan untuk ujicoba
+  - url: https://produksi.websiteku.com
+    description: digunakan untuk running
+  - url: https://legacy.websiteku.com/{versi}
+    variables:
+      versi:
+        default: v1
+        enum:
+          - v1
+          - v2
+          - v3
+tags:
+  - name: User
+  - name: Todo
+paths:
+  /hello:
+    get:
+      responses:
+        200:
+          description: success message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "Hello world"
+  /users/{id}:
+    get:
+      tags:
+        - "User"
+      description: "untuk melihat profil berdasarkan ID tertentu"
+      summary: "lihat profile"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "sukses menampilkan profile"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  nama: jerry
+                  email: jerry@alterra.id
+                message: "sukses lihat profile"
+        404:
+          description: "data tidak ditemukan"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "sukses lihat profile"
+
+        
+  /user:
+    post:
+      tags:
+        - "User"
+      description: digunakan untuk menambahkan data user
+      summary: register user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama:
+                  type: string
+                tanggal_lahir:
+                  type: string
+                  format: date
+                hp:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                alamat:
+                  type: array
+                  items: 
+                    type: string
+                contact:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      nama:
+                        type: string
+                      hubungan:
+                        type: string
+            example:
+              nama: jerry
+              tanggal_lahir: "2023-01-01"
+              hp: "081234567"
+              email: jerry@alterra.id
+              alamat:
+                - surabaya
+                - pasuruan
+              contact:
+                - nama: tono
+                  hubungan: teman
+                - nama: budi
+                  hubungan: ayah
+      responses:
+        201:
+          description: "Berhasil insert data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "success add data"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+    get:
+      tags:
+        - User
+      description: digunakan untuk melihat daftar user
+      responses:
+        200:
+          description: "sukses melihat data"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObjectArr'
+              example:
+                data:
+                  - name: Jerry
+                    hp: "08123456"
+                  - name: Fajar
+                    hp: "12345678"
+                message: berhasil menampilkan data user
+        204:
+          description: "sukses"
+            
+        404:
+          description: "Kesalahan input data dari user"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "data tidak ditemukan"
+        500:
+          $ref: '#/components/responses/500'
+  /login:
+    post:
+      tags:
+        - "User"
+      description: digunakan untuk masuk kedalam sistem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: "Berhasil login"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  nama: jerry
+                  email: jerry@alterra.id
+                message: "success login"
+        404:
+          description: "Kesalahan input data dari user"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "data tidak ditemukan"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    responseObject:
+      type: object
+      properties:
+        data:
+          type: object
+        message:
+          type: string
+    responseObjectArr:
+      type: object
+      properties:
+        data:
+          type: array
+          items: 
+            type: object
+        message:
+          type: string
+  responses:
+    400:
+      description: "Kesalahan dari user"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          example:
+            message: "kesalahan input"
+    500:
+      description: "Kesalahan dari server"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            example:
+              message: "data tidak bisa diolah"
+
+  
+
+
+          
+  
