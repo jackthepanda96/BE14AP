@@ -41,6 +41,55 @@ paths:
               example:
                 message: "Hello world"
   /users/{id}:
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "User"
+      responses:
+        400:
+          $ref: '#/components/responses/400'
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - "nama"
+              type: object
+              properties:
+                nama:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      tags:
+          - "User"
+      responses:
+          404:
+            description: "data tidak ditemukan"
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                example:
+                  message: "data tidak ditemukan"
+          400:
+            $ref: '#/components/responses/400'
     get:
       tags:
         - "User"
