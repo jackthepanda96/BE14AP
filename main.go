@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/config"
 	"api/user"
 	"log"
 	"net/http"
@@ -10,8 +11,10 @@ import (
 
 func main() {
 	e := echo.New()
-	arr := []user.User{}
-	controll := user.UserControll{ListUser: arr}
+	cfg := config.InitConfig()
+	db := config.InitDB(*cfg)
+	config.Migrate(db)
+	controll := user.UserControll{DB: db}
 
 	e.GET("/hello", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "Hello World")
