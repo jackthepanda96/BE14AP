@@ -4,9 +4,10 @@ import (
 	"api/model"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,6 +16,25 @@ import (
 // memberikan respon ke user
 type UserControll struct {
 	Mdl model.UserModel
+}
+
+func CreateToken(userId int) (string, error) {
+	claims := jwt.MapClaims{}
+	claims["authorized"] = true
+	claims["userID"] = userId
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte("BE!4a|t3rr4"))
+}
+
+func ExtractToken(e echo.Context) int {
+	user := e.Get("user").(*jwt.Token)
+	if user.Valid {
+		claims := user.Claims.(jwt.MapClaims)
+		userId := claims["userID"].(float64)
+		return int(userId)
+	}
+	return -1
 }
 
 func (uc *UserControll) Login() echo.HandlerFunc {
@@ -36,9 +56,13 @@ func (uc *UserControll) Login() echo.HandlerFunc {
 				"message": err.Error(),
 			})
 		}
-
+		jwtToken, err := CreateToken(int(res.ID))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    res,
+			"token":   jwtToken,
 			"message": "sukses login",
 		})
 	}
@@ -81,15 +105,16 @@ func (uc *UserControll) GetAll() echo.HandlerFunc {
 // /users/:id
 func (uc *UserControll) GetID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		paramID := c.Param("id")
-		cnvID, err := strconv.Atoi(paramID)
-		if err != nil {
-			log.Println("convert id error ", err.Error())
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"message": "gunakan input angka",
-			})
-		}
-		res, err := uc.Mdl.GetByID(cnvID)
+		id := ExtractToken(c)
+		// paramID := c.Param("id")
+		// cnvID, err := strconv.Atoi(paramID)
+		// if err != nil {
+		// 	log.Println("convert id error ", err.Error())
+		// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		// 		"message": "gunakan input angka",
+		// 	})
+		// }
+		res, err := uc.Mdl.GetByID(id)
 		if err != nil {
 			log.Println("query error", err.Error())
 			return c.JSON(http.StatusInternalServerError, "tidak bisa diproses")
@@ -103,23 +128,24 @@ func (uc *UserControll) GetID() echo.HandlerFunc {
 
 func (uc *UserControll) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		paramID := c.Param("id")
-		cnvID, err := strconv.Atoi(paramID)
-		if err != nil {
-			log.Println("convert id error ", err.Error())
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"message": "gunakan input angka",
-			})
-		}
+		id := ExtractToken(c)
+		// paramID := c.Param("id")
+		// cnvID, err := strconv.Atoi(paramID)
+		// if err != nil {
+		// 	log.Println("convert id error ", err.Error())
+		// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		// 		"message": "gunakan input angka",
+		// 	})
+		// }
 		body := model.User{}
-		err = c.Bind(&body)
+		err := c.Bind(&body)
 		if err != nil {
 			log.Println("bind body error ", err.Error())
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
 				"message": "masukkan input sesuai pola",
 			})
 		}
-		body.ID = uint(cnvID)
+		body.ID = uint(id)
 		res, err := uc.Mdl.Update(body)
 
 		if err != nil {
@@ -135,23 +161,24 @@ func (uc *UserControll) Update() echo.HandlerFunc {
 
 func (uc *UserControll) Update2() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		paramID := c.Param("id")
-		cnvID, err := strconv.Atoi(paramID)
-		if err != nil {
-			log.Println("convert id error ", err.Error())
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"message": "gunakan input angka",
-			})
-		}
+		id := ExtractToken(c)
+		// paramID := c.Param("id")
+		// cnvID, err := strconv.Atoi(paramID)
+		// if err != nil {
+		// 	log.Println("convert id error ", err.Error())
+		// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		// 		"message": "gunakan input angka",
+		// 	})
+		// }
 		body := model.User{}
-		err = c.Bind(&body)
+		err := c.Bind(&body)
 		if err != nil {
 			log.Println("bind body error ", err.Error())
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
 				"message": "masukkan input sesuai pola",
 			})
 		}
-		body.ID = uint(cnvID)
+		body.ID = uint(id)
 		res, err := uc.Mdl.Update2(body)
 
 		if err != nil {
@@ -166,16 +193,17 @@ func (uc *UserControll) Update2() echo.HandlerFunc {
 
 func (uc *UserControll) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		paramID := c.Param("id")
-		cnvID, err := strconv.Atoi(paramID)
-		if err != nil {
-			log.Println("convert id error ", err.Error())
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"message": "gunakan input angka",
-			})
-		}
+		id := ExtractToken(c)
+		// paramID := c.Param("id")
+		// cnvID, err := strconv.Atoi(paramID)
+		// if err != nil {
+		// 	log.Println("convert id error ", err.Error())
+		// 	return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		// 		"message": "gunakan input angka",
+		// 	})
+		// }
 
-		err = uc.Mdl.Delete(cnvID)
+		err := uc.Mdl.Delete(id)
 
 		if err != nil {
 			log.Println("delete error", err.Error())
