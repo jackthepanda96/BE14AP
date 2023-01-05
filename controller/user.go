@@ -28,16 +28,6 @@ func CreateToken(userId int) (string, error) {
 	return token.SignedString([]byte(config.JWT_KEY))
 }
 
-func ExtractToken(e echo.Context) int {
-	user := e.Get("user").(*jwt.Token)
-	if user.Valid {
-		claims := user.Claims.(jwt.MapClaims)
-		userId := claims["userID"].(float64)
-		return int(userId)
-	}
-	return -1
-}
-
 func (uc *UserControll) Login() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		tmp := model.User{}
