@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"api/config"
 	"api/model"
 	"log"
 	"net/http"
@@ -24,7 +25,7 @@ func CreateToken(userId int) (string, error) {
 	claims["userID"] = userId
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte("BE!4a|t3rr4"))
+	return token.SignedString([]byte(config.JWT_KEY))
 }
 
 func ExtractToken(e echo.Context) int {
