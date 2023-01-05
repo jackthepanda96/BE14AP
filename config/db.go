@@ -1,7 +1,6 @@
 package config
 
 import (
-	todo "api/ToDo"
 	"api/model"
 	"fmt"
 	"log"
@@ -24,6 +23,5 @@ func InitDB(ac AppConfig) *gorm.DB {
 
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(model.User{})
-	db.AutoMigrate(todo.Activity{})
-	db.AutoMigrate(todo.Cars{})
+	db.AutoMigrate(model.Goods{})
 }
