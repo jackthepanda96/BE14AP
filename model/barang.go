@@ -8,7 +8,8 @@ import (
 
 type Goods struct {
 	gorm.Model
-	Title  string
+	Title  string `json:"title"`
+	User   User
 	UserID uint // foreign (default format)
 }
 
@@ -29,6 +30,17 @@ func (gm *GoodsModel) Insert(newItem Goods) (Goods, error) {
 func (gm *GoodsModel) GetAllByID(id int) ([]Goods, error) {
 	res := []Goods{}
 	err := gm.DB.Where("user_id = ?", id).Find(&res).Error
+	if err != nil {
+		log.Println("select goods query error : ", err.Error())
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (gm *GoodsModel) Details(id int) ([]Goods, error) {
+	res := []Goods{}
+	err := gm.DB.Preload("User").Where("user_id = ?", id).Find(&res).Error
 	if err != nil {
 		log.Println("select goods query error : ", err.Error())
 		return nil, err

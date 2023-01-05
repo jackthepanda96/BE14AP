@@ -15,8 +15,10 @@ func main() {
 	cfg := config.InitConfig()
 	db := config.InitDB(*cfg)
 	config.Migrate(db)
-	model := model.UserModel{DB: db}
-	controll := controller.UserControll{Mdl: model}
+	uModel := model.UserModel{DB: db}
+	gsModel := model.GoodsModel{DB: db}
+	controll := controller.UserControll{Mdl: uModel}
+	gsControll := controller.GoodsControll{Mdl: gsModel}
 
 	e.Pre(middleware.RemoveTrailingSlash()) // fungsi ini dijalankan sebelum routing
 
@@ -27,7 +29,6 @@ func main() {
 	// e.Use(middleware.Logger()) // Dipakai untuk membuat log (catatan) ketika endpoint diakses
 
 	e.POST("/register", controll.Insert())
-
 	e.POST("/login", controll.Login())
 
 	needLogin := e.Group("/users")
@@ -38,6 +39,12 @@ func main() {
 	// PATCH localhost:8000/users/:id/patch
 	needLogin.PUT("", controll.Update2(), middleware.JWT([]byte(config.JWT_KEY)))
 	needLogin.DELETE("", controll.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
+
+	items := e.Group("/items")
+	items.Use(middleware.JWT([]byte(config.JWT_KEY)))
+	items.POST("", gsControll.AddGoods())
+	items.GET("", gsControll.ShowGoods())
+	items.GET("/detail", gsControll.GoodsDetails())
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
