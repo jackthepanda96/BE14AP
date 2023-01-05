@@ -6,12 +6,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	JWT_KEY string = ""
+)
+
 type AppConfig struct {
 	DBUser string
 	DBPass string
 	DBHost string
 	DBPort int
 	DBName string
+	jwtKey string
 }
 
 func InitConfig() *AppConfig {
@@ -35,5 +40,7 @@ func ReadEnv() *AppConfig {
 		log.Println("error parse config : ", err.Error())
 		return nil
 	}
+
+	JWT_KEY = app.jwtKey
 	return &app
 }

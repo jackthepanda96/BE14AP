@@ -24,24 +24,20 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
-	// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-	// 	Format: "method=${method}, uri=${uri}, status=${status}\n",
-	// }))
 	// e.Use(middleware.Logger()) // Dipakai untuk membuat log (catatan) ketika endpoint diakses
 
-	e.POST("/users", controll.Insert())
-	e.GET("/users", controll.GetAll())
+	e.POST("/register", controll.Insert())
 
 	e.POST("/login", controll.Login())
 
 	needLogin := e.Group("/users")
-	needLogin.Use(middleware.JWT([]byte("BE!4a|t3rr4")))
-
-	needLogin.GET("", controll.GetID())
-	needLogin.PATCH("/patch", controll.Update())
+	// needLogin.Use(middleware.JWT([]byte(cfg.JWTKey)))
+	needLogin.GET("", controll.GetAll())
+	needLogin.GET("/:id", controll.GetID(), middleware.JWT([]byte(config.JWT_KEY)))
+	needLogin.PATCH("", controll.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	// PATCH localhost:8000/users/:id/patch
-	needLogin.PUT("", controll.Update2())
-	needLogin.DELETE("", controll.Delete())
+	needLogin.PUT("", controll.Update2(), middleware.JWT([]byte(config.JWT_KEY)))
+	needLogin.DELETE("", controll.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
