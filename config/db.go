@@ -1,7 +1,8 @@
 package config
 
 import (
-	"api/model"
+	"api/features/user/data"
+
 	"fmt"
 	"log"
 
@@ -22,6 +23,6 @@ func InitDB(ac AppConfig) *gorm.DB {
 }
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(model.User{})
-	db.AutoMigrate(model.Goods{})
+	db.AutoMigrate(data.User{})
+	// db.AutoMigrate(model.Goods{})
 }

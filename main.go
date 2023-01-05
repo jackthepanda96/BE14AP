@@ -2,12 +2,12 @@ package main
 
 import (
 	"api/config"
-	"api/controller"
-	"api/model"
+	"api/features/user/data"
+	"api/features/user/handler"
+	"api/features/user/services"
 	"log"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -15,36 +15,14 @@ func main() {
 	cfg := config.InitConfig()
 	db := config.InitDB(*cfg)
 	config.Migrate(db)
-	uModel := model.UserModel{DB: db}
-	gsModel := model.GoodsModel{DB: db}
-	controll := controller.UserControll{Mdl: uModel}
-	gsControll := controller.GoodsControll{Mdl: gsModel}
 
-	e.Pre(middleware.RemoveTrailingSlash()) // fungsi ini dijalankan sebelum routing
+	userData := data.New(db)
+	userSrv := services.New(userData)
+	userHdl := handler.New(userSrv)
 
-	e.Use(middleware.CORS()) // WAJIB DIPAKAI agar tidak terjadi masalah permission
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
-	}))
-	// e.Use(middleware.Logger()) // Dipakai untuk membuat log (catatan) ketika endpoint diakses
-
-	e.POST("/register", controll.Insert())
-	e.POST("/login", controll.Login())
-
-	needLogin := e.Group("/users")
-	// needLogin.Use(middleware.JWT([]byte(cfg.JWTKey)))
-	needLogin.GET("", controll.GetAll())
-	needLogin.GET("/:id", controll.GetID(), middleware.JWT([]byte(config.JWT_KEY)))
-	needLogin.PATCH("", controll.Update(), middleware.JWT([]byte(config.JWT_KEY)))
-	// PATCH localhost:8000/users/:id/patch
-	needLogin.PUT("", controll.Update2(), middleware.JWT([]byte(config.JWT_KEY)))
-	needLogin.DELETE("", controll.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
-
-	items := e.Group("/items")
-	items.Use(middleware.JWT([]byte(config.JWT_KEY)))
-	items.POST("", gsControll.AddGoods())
-	items.GET("", gsControll.ShowGoods())
-	items.GET("/detail", gsControll.GoodsDetails())
+	e.POST("/register", userHdl.Register())
+	e.POST("/login", userHdl.Login())
+	e.GET("/users/:id", userHdl.Profile())
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
