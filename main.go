@@ -2,6 +2,9 @@ package main
 
 import (
 	"api/config"
+	bd "api/features/book/data"
+	bhl "api/features/book/handler"
+	bsrv "api/features/book/services"
 	"api/features/user/data"
 	"api/features/user/handler"
 	"api/features/user/services"
@@ -21,6 +24,10 @@ func main() {
 	userSrv := services.New(userData)
 	userHdl := handler.New(userSrv)
 
+	bookData := bd.New(db)
+	bookSrv := bsrv.New(bookData)
+	bookHdl := bhl.New(bookSrv)
+
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -30,6 +37,8 @@ func main() {
 	e.POST("/register", userHdl.Register())
 	e.POST("/login", userHdl.Login())
 	e.GET("/users", userHdl.Profile(), middleware.JWT([]byte(config.JWT_KEY)))
+
+	e.POST("/books", bookHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
