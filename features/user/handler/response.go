@@ -24,11 +24,15 @@ func ToResponse(data user.Core) UserReponse {
 	}
 }
 
-func PrintSuccessReponse(code int, message string, data user.Core) (int, interface{}) {
+func PrintSuccessReponse(code int, message string, data ...interface{}) (int, interface{}) {
 	resp := map[string]interface{}{}
-	if data.ID != 0 {
-		resp["data"] = ToResponse(data)
+	if len(data) < 2 {
+		resp["data"] = ToResponse(data[0].(user.Core))
+	} else {
+		resp["data"] = ToResponse(data[0].(user.Core))
+		resp["token"] = data[1].(string)
 	}
+
 	if message != "" {
 		resp["message"] = message
 	}
