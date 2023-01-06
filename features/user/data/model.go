@@ -1,6 +1,7 @@
 package data
 
 import (
+	"api/features/book/data"
 	"api/features/user"
 
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ type User struct {
 	Alamat   string
 	HP       string
 	Password string
+	Book     []data.Books
 }
 
 func ToCore(data User) user.Core {

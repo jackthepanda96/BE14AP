@@ -20,9 +20,9 @@ type UserHandler interface {
 }
 
 type UserService interface {
-	Login(email, password string) (Core, error)
+	Login(email, password string) (string, Core, error)
 	Register(newUser Core) (Core, error)
-	Profile(id uint) (Core, error)
+	Profile(token interface{}) (Core, error)
 	// Update(id uint, updateData Core) (Core, error)
 	// Deactive(id uint) error
 }
