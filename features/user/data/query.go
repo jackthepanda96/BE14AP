@@ -36,7 +36,7 @@ func (uq *userQuery) Register(newUser user.Core) (user.Core, error) {
 	}
 
 	newUser.ID = cnv.ID
-
+	newUser.Password = ""
 	return newUser, nil
 }
 func (uq *userQuery) Profile(id uint) (user.Core, error) {
