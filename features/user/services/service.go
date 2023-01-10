@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type userUseCase struct {
@@ -26,6 +25,10 @@ func New(ud user.UserData) user.UserService {
 }
 
 func (uuc *userUseCase) Login(email, password string) (string, user.Core, error) {
+	if password == "" {
+		return "", user.Core{}, errors.New("ini percobaan untuk validasi")
+	}
+
 	res, err := uuc.qry.Login(email)
 	if err != nil {
 		msg := ""
@@ -37,7 +40,7 @@ func (uuc *userUseCase) Login(email, password string) (string, user.Core, error)
 		return "", user.Core{}, errors.New(msg)
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(res.Password), []byte(password)); err != nil {
+	if err := helper.CheckPassword(res.Password, password); err != nil {
 		log.Println("login compare", err.Error())
 		return "", user.Core{}, errors.New("password tidak sesuai " + res.Password)
 	}
@@ -53,7 +56,7 @@ func (uuc *userUseCase) Login(email, password string) (string, user.Core, error)
 
 }
 func (uuc *userUseCase) Register(newUser user.Core) (user.Core, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
+	hashed, err := helper.GeneratePassword(newUser.Password)
 
 	if err != nil {
 		log.Println("bcrypt error ", err.Error())
