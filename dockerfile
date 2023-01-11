@@ -3,8 +3,6 @@ FROM golang:1.19-alpine
 ##buat folder APP
 RUN mkdir /app
 
-RUN mkdir /project
-
 ##set direktori utama
 WORKDIR /app
 
